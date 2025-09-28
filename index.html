@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="UTF-8">
+    <title>Motion Hud</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="hud-interface" style="display: 1;">
+        <div class="hud-container">
+            <div class="hud-nickname-block">
+                <div id="hud-nickname">Jack Astrovskiy</div>
+                <div id="hud-player-id">238</div>
+            </div>
+            <div class="hud-footer-block">
+                <div class="hud-times-block">
+                    <div class="hud-time">
+                        <div id="time">{{ time }}</div>
+                    </div>
+                    <div class="hud-time">
+                        <div id="date">{{ date }}</div>
+                    </div>
+                </div>
+                <div class="hud-server-logo">
+                    <div class="hud-server-logo-image"></div>
+                </div>
+            </div>
+            <div class="progress-block-one">
+                <div class="armour-progress-block">
+                    <progress id="armour-progress" class="armour-progress" value="100" max="100"></progress>
+                    <div id="progress-armour-value">100</div>
+                </div>
+                <div class="eat-progress-block">
+                    <div id="eat-value">50</div>
+                    <progress id="eat-progress" class="eat-progress" value="50" max="100"></progress>
+                </div>
+            </div>
+            <div class="health-progress-block">
+                <progress id="health-progress" class="health-progress" value="50" max="100"></progress>
+                <div id="health-value">50</div>
+            </div>
+            <div class="money-container">
+                <div class="hud-money-block">
+                    <img class="icon-wallet" src="images/wallet.png" alt="">
+                    <div id="hud-rubles">1 000 000</div>
+                    <img class="icon-ruble" src="images/icon-ruble.svg" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+        setInterval(function() {
+            var d = new Date();
+            var month = d.getMonth() + 1;
+            document.getElementById("time").innerText = `${d.getHours().toString().padStart(2, '0') + ":" + d.getMinutes().toString().padStart(2, '0') + ":" + d.getSeconds().toString().padStart(2, '0')}`;
+            document.getElementById("date").innerText = `${d.getDate().toString().padStart(2, '0')}.${month.toString().padStart(2, '0')}.${d.getFullYear()}`;
+        }, 1000);   
+        cef.emit("game:data:pollPlayerStats", true, 50);
+        cef.on("game:data:playerStats", (hp, max_hp, arm, breath, wanted, weapon, ammo, max_ammo, money, speed) => {
+            document.getElementById('health-progress').value = `${hp}`;
+            document.getElementById('health-value').innerText = `${hp}`;
+            document.getElementById('armour-progress').value = `${arm}`;  
+            document.getElementById('progress-armour-value').innerText = `${arm}`; 
+            var moneyInt = (money).toLocaleString('ru');    
+            document.getElementById("hud-rubles").innerText = `${moneyInt}`;
+        });
+        cef.on("update-hud", (playername, playerid) => {
+            document.getElementById('hud-nickname').innerText = `${playername}`;     
+            document.getElementById("hud-player-id").innerText = `${playerid}`;
+        });
+
+        cef.on("show-hud", () => {
+            document.getElementById("hud-interface").style = "display: block;";
+        });
+
+        cef.on("hide-hud", () => {
+            document.getElementById("hud-interface").style = "display: none;";
+        });        
+       
+        cef.on("update-eat", (eat) => {
+            document.getElementById('eat-progress').value = `${eat}`;     
+            document.getElementById('eat-value').innerText = `${eat}`;     
+        });    
+</script>
+</html>
